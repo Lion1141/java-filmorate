@@ -13,7 +13,7 @@ import java.util.HashMap;
 @RestController
 @Slf4j
 public class UserController {
-    protected final HashMap<Integer, User> users = new HashMap<>();
+    protected HashMap<Integer, User> users = new HashMap<>();
     protected Integer id = 1;
 
     @GetMapping("/users")
@@ -49,8 +49,7 @@ public class UserController {
         try {
             if (updatedUser.getName().isBlank() || updatedUser.getName() == null) {
                 updatedUser.setName(updatedUser.getLogin());
-            } else {
-                if(!users.containsKey(updatedUser.getId())) {
+            } else if (!users.containsKey(updatedUser.getId())) {
                     throw new ValidationException("не удалось обновить пользователя");
                 }
                 updatedUser.setName(updatedUser.getName());
@@ -59,8 +58,6 @@ public class UserController {
                 users.put(updatedUser.getId(), updatedUser);
                 log.info("Пользователь успешно обновлён: " + updatedUser.getName());
                 return updatedUser;
-            }
-            throw new ValidationException("Не удалось обновить пользователя");
         } catch (Exception e) {
             log.error("Ошибка при обновлении пользователя: " + e.getMessage());
             throw e;

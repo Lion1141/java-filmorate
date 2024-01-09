@@ -34,10 +34,10 @@ public class FilmControllerTest extends FilmController {
                 .releaseDate(LocalDate.of(2010, 7, 16))
                 .duration(148L)
                 .build();
-        films.put(1, existingFilm);
+        filmController.addFilm(existingFilm);
 
         Film updatedFilm = Film.builder()
-                .id(1)
+                .id(existingFilm.getId())
                 .name("Inception: Special Edition")
                 .description("A heist movie that takes place within the architecture of the mind, now with extra scenes")
                 .releaseDate(LocalDate.of(2010, 7, 16))

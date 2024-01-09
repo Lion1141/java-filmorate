@@ -36,10 +36,10 @@ public class UserControllerTest extends UserController {
                 .name("Existing User")
                 .birthday(LocalDate.of(1980, 5, 15))
                 .build();
-        users.put(existingUser.getId(), existingUser);
+        userController.createUser(existingUser);
 
         User updatedUser = User.builder()
-                .id(existingUser.getId())
+                .id(1)
                 .email("updated.user@example.com")
                 .login("updateduser")
                 .name("Updated User")

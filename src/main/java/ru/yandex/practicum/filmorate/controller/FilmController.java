@@ -30,7 +30,7 @@ public class FilmController {
 
     @PutMapping("/films")
     public Film updateFilm(@Valid @RequestBody Film updatedFilm) throws RuntimeException {
-        if(!films.containsKey(updatedFilm.getId())) {
+        if (!films.containsKey(updatedFilm.getId())) {
             throw new RuntimeException("Неизвестный фильм");
         }
         updatedFilm.setName(updatedFilm.getName());

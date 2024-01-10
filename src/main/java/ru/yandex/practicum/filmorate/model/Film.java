@@ -21,7 +21,7 @@ public class Film {
     @Size(max = 200)
     private String description;
     @IsAfter(current = "1895-12-28", message = "Ошибка. В эту дату фильм не мог выйти")
-    @DateTimeFormat( pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
     @Positive
     private long duration;

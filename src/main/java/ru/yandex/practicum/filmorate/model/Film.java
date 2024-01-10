@@ -1,7 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
+
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+import ru.yandex.practicum.filmorate.validator.IsAfter;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -12,14 +15,14 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Film {
-        Integer id;
-    @NotBlank(message = "Название фильма не должно быть пустым")
-    String name;
+    private Integer id;
+    @NotEmpty(message = "Название фильма не должно быть пустым")
+    private String name;
     @Size(max = 200)
-    String description;
-    LocalDate releaseDate; //не смог подобрать нужную аннотацию
+    private String description;
+    @IsAfter(current = "1895-12-28", message = "Ошибка. В эту дату фильм не мог выйти")
+    @DateTimeFormat( pattern = "yyyy-MM-dd")
+    private LocalDate releaseDate;
     @Positive
-    Long duration;
-
-
+    private long duration;
 }

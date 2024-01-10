@@ -11,13 +11,13 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class User {
-Integer id;
+    private Integer id;
     @Email(message = "Некорректно введён email пользователя")
-String email;
+    private String email;
     @NotEmpty(message = "Некорректно введён логин")
-String login;
-String name; //не смог подобрать нужную аннотацию
+    private String login;
+    private String name;
     @Past
-LocalDate birthday;
+    private LocalDate birthday;
 
 }

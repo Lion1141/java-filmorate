@@ -33,13 +33,13 @@ public class UserController {
 
     @PutMapping("/users")
     public User updateUsers(@Valid @RequestBody User updatedUser) {
-        if(!users.containsKey(updatedUser.getId())) {
+        if (!users.containsKey(updatedUser.getId())) {
             throw new RuntimeException("Неизвестный фильм");
         }
             if (updatedUser.getName().isBlank() || updatedUser.getName() == null) {
                 updatedUser.setName(updatedUser.getLogin());
             }
-        if(!users.containsKey(updatedUser.getId())){
+        if (!users.containsKey(updatedUser.getId())) {
             throw new RuntimeException("Не удалось обновить пользователя");
         }
         updatedUser.setName(updatedUser.getName());

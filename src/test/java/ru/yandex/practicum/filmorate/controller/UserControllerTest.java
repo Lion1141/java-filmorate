@@ -157,7 +157,7 @@ public class UserControllerTest extends AbstractControllerTest {
         userController.createUser(existingUser3);
         when(userService.getFriends(1)).thenReturn(Arrays.asList(
                 existingUser2,
-                existingUser2
+                existingUser3
         ));
         Collection<User> result = userController.getFriends(1);
         verify(userService).getFriends(1);

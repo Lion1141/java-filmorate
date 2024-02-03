@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-public class FilmControllerTest extends AbstractControllerTest{
+public class FilmControllerTest extends AbstractControllerTest {
     @Autowired
     private FilmController filmController;
 
@@ -53,6 +53,7 @@ public class FilmControllerTest extends AbstractControllerTest{
         Film newFilm = filmController.updateFilm(updatedFilm);
         assertEquals(updatedFilm, newFilm);
     }
+
         @Test
         public void testDeleteFilm() {
             FilmService filmService = mock(FilmService.class);
@@ -150,6 +151,7 @@ public class FilmControllerTest extends AbstractControllerTest{
         verify(filmService).getMostPopular(5);
         assertEquals(5, result.size());
     }
+
     @Test
     public void testAddLike() {
         FilmService filmService = mock(FilmService.class);

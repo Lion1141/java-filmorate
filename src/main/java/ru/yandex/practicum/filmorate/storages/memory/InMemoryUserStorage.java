@@ -51,13 +51,13 @@ public class InMemoryUserStorage implements UserStorage {
             return updatedUser;
         }
     }
+
     @Override
     public Optional<User> findById(Integer userId) throws RuntimeException {
         User user = users.get(userId);
-        if(user != null){
+        if (user != null) {
             return Optional.of(user);
-        }
-        else {
+        } else {
             return Optional.empty();
         }
     }

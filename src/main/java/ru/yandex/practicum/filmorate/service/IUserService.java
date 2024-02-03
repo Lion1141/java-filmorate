@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface IUserService {
     User createUser(User user);
+
     Collection<User> getUsers();
 
     Optional<User> findById(Integer userId);

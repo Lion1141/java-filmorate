@@ -52,7 +52,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(Integer filmId) {
-        if(films.containsKey(filmId)) {
+        if (films.containsKey(filmId)) {
             films.remove(filmId);
         } else {
             log.debug("Ошибка удаления фильма с ID: {}", filmId);
@@ -68,12 +68,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> findById(Integer filmId) {
-        if(films.containsKey(filmId)) {
+        if (films.containsKey(filmId)) {
             return Optional.of(films.get(filmId));
         } else {
             return Optional.empty();
         }
     }
-
-
 }

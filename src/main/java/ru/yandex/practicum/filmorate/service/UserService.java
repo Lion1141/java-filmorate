@@ -54,7 +54,7 @@ public class UserService implements IUserService {
     public void addFriend(Integer id, Integer friendId) {
         User friend = storage.findById(friendId).get();
         User user = storage.findById(id).get();
-        if(user.getFriends().contains(friend.getId())){
+        if (user.getFriends().contains(friend.getId())) {
             return;
         }
         user.addFriend(friend);

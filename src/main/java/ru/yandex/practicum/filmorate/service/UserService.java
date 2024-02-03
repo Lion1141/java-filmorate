@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService implements IUserService {
-
     @Autowired
     private final UserStorage storage;
 

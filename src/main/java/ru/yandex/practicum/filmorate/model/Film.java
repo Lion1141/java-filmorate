@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.validator.IsAfter;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Set;
 @Builder
 public class Film {
     private Integer rate;
-    private Set<Integer> likes;
+    final private Set<Integer> likes = new HashSet<>();
     private Integer id;
     @NotEmpty(message = "Название фильма не должно быть пустым")
     private String name;

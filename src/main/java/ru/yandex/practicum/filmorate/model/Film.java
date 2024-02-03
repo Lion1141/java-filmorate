@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.validator.IsAfter;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -15,6 +17,8 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Film {
+    private Integer rate;
+    final private Set<Integer> likes = new HashSet<>();
     private Integer id;
     @NotEmpty(message = "Название фильма не должно быть пустым")
     private String name;
@@ -25,4 +29,12 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private long duration;
+
+    public void addLike(Integer filmId) {
+        likes.add(filmId);
+    }
+
+    public void removeLike(Integer userId) {
+        likes.remove(userId);
+    }
 }

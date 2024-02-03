@@ -51,10 +51,9 @@ private final FilmService filmService;
         }
         var film = filmService.findById(id);
 
-        if(film.isEmpty()){
+        if (film.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти фильм с указанным ID");
         }
-
         return film;
     }
 

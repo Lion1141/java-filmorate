@@ -36,6 +36,7 @@ public class UserControllerTest extends AbstractControllerTest {
             validator = factory.getValidator();
         }
     }
+
     @AfterEach
     void cleanData() {
         filmService.getFilms().forEach(film -> film.getLikes().clear());
@@ -77,6 +78,7 @@ public class UserControllerTest extends AbstractControllerTest {
         User returnedUser = userController.updateUsers(updatedUser);
         assertEquals(updatedUser, returnedUser);
     }
+
     @Test
     void shouldRemoveUserByIdCorrectly() {
         User existingUser1 = User.builder()
@@ -132,28 +134,29 @@ public class UserControllerTest extends AbstractControllerTest {
         });
         verify(userService, never()).addFriend(0, 2);
     }
+
     @Test
     public void testGetFriends() {
         UserService userService = mock(UserService.class);
         UserController userController = new UserController(userService);
-        User existingUser1 = User.builder()
+        User existingUser2 = User.builder()
                 .id(2)
                 .email("existing.user2@example.com")
                 .login("existinguser2")
                 .name("Existing User2")
                 .birthday(LocalDate.of(1980, 5, 15))
                 .build();
-        userController.createUser(existingUser1);
-        User existingUser2 = User.builder()
+        userController.createUser(existingUser2);
+        User existingUser3 = User.builder()
                 .id(3)
                 .email("existing.user3@example.com")
                 .login("existinguser3")
                 .name("Existing User3")
                 .birthday(LocalDate.of(1995, 3, 20))
                 .build();
-        userController.createUser(existingUser2);
+        userController.createUser(existingUser3);
         when(userService.getFriends(1)).thenReturn(Arrays.asList(
-                existingUser1,
+                existingUser2,
                 existingUser2
         ));
         Collection<User> result = userController.getFriends(1);
@@ -162,13 +165,15 @@ public class UserControllerTest extends AbstractControllerTest {
         assertEquals(2, result.stream().map(User::getId).collect(Collectors.toList()).get(0));
         assertEquals(3, result.stream().map(User::getId).collect(Collectors.toList()).get(1));
     }
-        @Test
-        public void testRemoveFriend() {
-            UserService userService = mock(UserService.class);
-            UserController userController = new UserController(userService);
-            userController.removeFriend(1, 2);
-            verify(userService).removeFriend(1, 2);
-        }
+
+    @Test
+    public void testRemoveFriend() {
+        UserService userService = mock(UserService.class);
+        UserController userController = new UserController(userService);
+        userController.removeFriend(1, 2);
+        verify(userService).removeFriend(1, 2);
+    }
+
     @Test
     public void testGetCrossFriend() {
         UserService userService = mock(UserService.class);
@@ -197,5 +202,43 @@ public class UserControllerTest extends AbstractControllerTest {
         verify(userService).getCrossFriends(1, 2);
         assertEquals(2, result.size());
     }
+
+    @Test
+    public void testGetUsers() {
+        UserService userService = mock(UserService.class);
+        UserController userController = new UserController(userService);
+        User existingUser1 = User.builder()
+                .id(1)
+                .email("existing.user1@example.com")
+                .login("existinguser1")
+                .name("Existing User1")
+                .birthday(LocalDate.of(1980, 5, 15))
+                .build();
+        userController.createUser(existingUser1);
+        User existingUser2 = User.builder()
+                .id(2)
+                .email("existing.user2@example.com")
+                .login("existinguser2")
+                .name("Existing User2")
+                .birthday(LocalDate.of(1995, 3, 20))
+                .build();
+        userController.createUser(existingUser2);
+        User existingUser3 = User.builder()
+                .id(3)
+                .email("existing.user3@example.com")
+                .login("existinguser3")
+                .name("Existing User3")
+                .birthday(LocalDate.of(1995, 3, 20))
+                .build();
+        userController.createUser(existingUser3);
+        when(userService.getUsers()).thenReturn(Arrays.asList(
+                existingUser1,
+                existingUser2,
+                existingUser3
+        ));
+        Collection<User> result = userController.getUsers();
+        verify(userService).getUsers();
+        assertEquals(3, result.size());
     }
+}
 

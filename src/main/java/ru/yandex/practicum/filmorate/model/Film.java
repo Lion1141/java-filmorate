@@ -18,7 +18,7 @@ import java.util.Set;
 @Builder
 public class Film {
     private Integer rate;
-    final private Set<Integer> likes = new HashSet<>();
+    private Set<Integer> likes;
     private Integer id;
     @NotEmpty(message = "Название фильма не должно быть пустым")
     private String name;

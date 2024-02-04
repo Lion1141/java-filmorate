@@ -11,14 +11,11 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Film.
- */
 @Data
 @Builder
 public class Film {
-    private Integer rate;
     private final Set<Integer> likes = new HashSet<>();
+    @Min(value = 1, message = "Невозможно найти фильм с указанным ID")
     private Integer id;
     @NotEmpty(message = "Название фильма не должно быть пустым")
     private String name;

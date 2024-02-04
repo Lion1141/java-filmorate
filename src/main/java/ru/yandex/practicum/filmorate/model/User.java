@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class User {
     private Set<Integer> friends = new HashSet<>();
+    @Min(value = 1, message = "Невозможно найти пользователем с указанным ID")
     private Integer id;
     @Email(message = "Некорректно введён email пользователя")
     private String email;

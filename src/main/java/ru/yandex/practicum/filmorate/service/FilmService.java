@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,16 +16,11 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService implements IFilmService {
     @Autowired
     private final FilmStorage storage;
     private final UserService userService;
-
-    @Autowired
-    public FilmService(FilmStorage storage, UserService userService) {
-        this.storage = storage;
-        this.userService = userService;
-    }
 
     @Override
     public Film addFilm(Film film) {

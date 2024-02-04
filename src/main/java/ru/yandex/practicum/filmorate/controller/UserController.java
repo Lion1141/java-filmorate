@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,13 +17,9 @@ import java.util.stream.Collectors;
 @RestController("")
 @RequestMapping("/users")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
     public Collection<User> getUsers() {
@@ -41,12 +37,12 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
-    public void deleteUser(Integer userId) {
+    public void deleteUser(@Valid @PathVariable Integer userId) {
         userService.deleteUser(userId);
     }
 
     @GetMapping("{id}")
-    public Optional<User> findById(@PathVariable Integer id) {
+    public Optional<User> findById(@Valid @PathVariable Integer id) {
         var user = userService.findById(id);
         if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
@@ -55,8 +51,8 @@ public class UserController {
     }
 
     @PutMapping("{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        if (id < 1 || friendId < 1) {
+    public void addFriend(@Valid @PathVariable Integer id, @Valid @PathVariable Integer friendId) {
+        if (friendId < 1) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
         }
         userService.addFriend(id, friendId);
@@ -66,6 +62,7 @@ public class UserController {
     @DeleteMapping("{id}/friends/{friendId}")
     public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.removeFriend(id, friendId);
+        userService.removeFriend(friendId, id);
     }
 
     @GetMapping("{id}/friends")

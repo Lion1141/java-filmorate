@@ -52,7 +52,7 @@ public class UserController {
 
     @PutMapping("{id}/friends/{friendId}")
     public void addFriend(@Valid @PathVariable Integer id, @Valid @PathVariable Integer friendId) {
-        if (friendId < 1) {
+        if (id < 1 || friendId < 1) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
         }
         userService.addFriend(id, friendId);

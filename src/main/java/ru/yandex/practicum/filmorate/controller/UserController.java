@@ -1,52 +1,81 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-@RestController
+@RestController("")
+@RequestMapping("/users")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    protected final HashMap<Integer, User> users = new HashMap<>();
-    protected Integer id = 1;
+    private final UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping
     public Collection<User> getUsers() {
-        return users.values();
+        return userService.getUsers();
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        return userService.createUser(user);
+    }
+
+    @PutMapping
+    public User updateUsers(@Valid @RequestBody User updatedUser) {
+        return userService.updateUser(updatedUser);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteUser(@Valid @PathVariable Integer userId) {
+        userService.deleteUser(userId);
+    }
+
+    @GetMapping("{id}")
+    public Optional<User> findById(@Valid @PathVariable Integer id) {
+        var user = userService.findById(id);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
         }
-        user.setId(id++);
-        int userId = user.getId();
-        users.put(userId, user);
-        log.info("Пользователь успешно добавлен: " + user.getName());
         return user;
     }
 
-    @PutMapping("/users")
-    public User updateUsers(@Valid @RequestBody User updatedUser) {
-        if (!users.containsKey(updatedUser.getId())) {
-            throw new RuntimeException("Неизвестный фильм");
+    @PutMapping("{id}/friends/{friendId}")
+    public void addFriend(@Valid @PathVariable Integer id, @Valid @PathVariable Integer friendId) {
+        if (id < 1 || friendId < 1) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
         }
-            if (updatedUser.getName().isBlank() || updatedUser.getName() == null) {
-                updatedUser.setName(updatedUser.getLogin());
-            }
-        if (!users.containsKey(updatedUser.getId())) {
-            throw new RuntimeException("Не удалось обновить пользователя");
-        }
-        updatedUser.setName(updatedUser.getName());
-        updatedUser.setEmail(updatedUser.getEmail());
-        updatedUser.setBirthday(updatedUser.getBirthday());
-        users.put(updatedUser.getId(), updatedUser);
-        log.info("Пользователь успешно обновлён: " + updatedUser.getName());
-        return updatedUser;
+        userService.addFriend(id, friendId);
+        userService.addFriend(friendId, id);
+    }
+
+    @DeleteMapping("{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.removeFriend(id, friendId);
+        userService.removeFriend(friendId, id);
+    }
+
+    @GetMapping("{id}/friends")
+    public Collection<User> getFriends(@PathVariable Integer id) {
+        return userService
+                .getFriends(id)
+                .stream()
+                .sorted(Comparator.comparing(user -> user.getId()))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("{id}/friends/common/{otherId}")
+    public Collection<User> getCrossFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCrossFriends(id, otherId);
     }
 }

@@ -23,6 +23,7 @@ import java.util.Optional;
 public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public Collection<Mpa> getAll() {
         Collection<Mpa> mpaList = new ArrayList<>();

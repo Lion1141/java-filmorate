@@ -20,7 +20,6 @@ public class FilmControllerTest extends AbstractControllerTest {
     @Autowired
     private FilmController controller;
     private FilmStorage filmStorage;
-
     private FilmService filmService;
     private Film testFilm;
 
@@ -68,7 +67,7 @@ public class FilmControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void createFilm_RealiseDateInFuture_badRequestTest(){
+    void createFilm_RealiseDateInFuture_badRequestTest() {
         testFilm.setReleaseDate(LocalDate.of(2033, 4, 14));
         try {
             controller.addFilm(testFilm);
@@ -78,7 +77,7 @@ public class FilmControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void createFilm_RealiseDateBeforeFirstFilmDate_badRequestTest(){
+    void createFilm_RealiseDateBeforeFirstFilmDate_badRequestTest() {
         testFilm.setReleaseDate(LocalDate.of(1833, 4, 14));
         try {
             controller.addFilm(testFilm);

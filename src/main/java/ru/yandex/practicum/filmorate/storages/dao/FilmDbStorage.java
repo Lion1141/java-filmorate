@@ -63,6 +63,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         return films;
     }
+
     @Override
     public Film updateFilm(Film updatedFilm) throws RuntimeException {
         String sqlQuery = "UPDATE FILMS SET " +

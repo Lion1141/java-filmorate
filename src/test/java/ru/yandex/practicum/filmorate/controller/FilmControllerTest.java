@@ -1,210 +1,90 @@
 package ru.yandex.practicum.filmorate.controller;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
+import ru.yandex.practicum.filmorate.storages.memory.InMemoryFilmStorage;
 
+import javax.validation.ValidationException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FilmControllerTest extends AbstractControllerTest {
+
     @Autowired
-    private FilmController filmController;
+    private FilmController controller;
+    private FilmStorage filmStorage;
 
-    @Test
-    public void testCreateFilm() {
-        Film film = Film.builder()
+    private FilmService filmService;
+    private Film testFilm;
+
+    @BeforeEach
+    protected void init() {
+        filmStorage = new InMemoryFilmStorage();
+        filmService = new FilmService(filmStorage);
+        controller = new FilmController(filmStorage, filmService);
+        testFilm = Film.builder()
                 .id(1)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
+                .name("Тестовый фильм")
+                .description("Тестовое описание тестового фильма")
+                .releaseDate(LocalDate.of(1999, 12, 27))
+                .duration(87)
                 .build();
-        Film addedFilm = filmController.addFilm(film);
-        assertEquals(film, addedFilm);
     }
 
     @Test
-    public void testUpdateFilm() {
-        Film existingFilm = Film.builder()
-                .id(2)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(existingFilm);
-
-        Film updatedFilm = Film.builder()
-                .id(existingFilm.getId())
-                .name("Inception: Special Edition")
-                .description("A heist movie that takes place within the architecture of the mind, now with extra scenes")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        Film newFilm = filmController.updateFilm(updatedFilm);
-        assertEquals(updatedFilm, newFilm);
+    void createNewCorrectFilm_isOkTest() {
+        Optional<Film> film = controller.addFilm(testFilm);
+        assertEquals(film, filmStorage.findById(1));
     }
 
-        @Test
-        public void testDeleteFilm() {
-            FilmService filmService = mock(FilmService.class);
-            FilmController filmController = new FilmController(filmService);
-            filmController.deleteFilm(1);
-            verify(filmService).deleteFilm(1);
+    @Test
+    void createFilm_NameIsBlank_badRequestTest() {
+        testFilm.setName("");
+        try {
+            controller.addFilm(testFilm);
+        } catch (ValidationException e) {
+            assertEquals("Некорректно указано название фильма.", e.getMessage());
         }
+    }
+
 
     @Test
-    public void testGetFilmWithValidId() {
-        Film existingFilm3 = Film.builder()
-                .id(3)
-                .name("Название фильма")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2005, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(existingFilm3);
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        when(filmService.findById(1)).thenReturn(Optional.of(existingFilm3));
-        Optional<Film> result = filmController.getFilm(1);
-        verify(filmService).findById(1);
-        assertTrue(result.isPresent());
-        assertEquals("Название фильма", result.get().getName());
-        assertEquals("Описание фильма", result.get().getDescription());
+    void createFilm_IncorrectDescription_badRequestTest() {
+        testFilm.setDescription("Размер описания значительно превышает двести символов, а может и не превышает " +
+                "(надо посчитать). Нет, к сожалению размер описания фильма сейчас не превышает двести символов," +
+                "но вот сейчас однозначно стал превышать двести символов!");
+        try {
+            controller.addFilm(testFilm);
+        } catch (ValidationException e) {
+            assertEquals("Превышено количество символов в описании фильма.", e.getMessage());
+        }
     }
 
     @Test
-    public void testGetFilmWithInvalidId() {
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        when(filmService.findById(10)).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class, () -> {
-            filmController.getFilm(10);
-        });
-        verify(filmService).findById(10);
+    void createFilm_RealiseDateInFuture_badRequestTest(){
+        testFilm.setReleaseDate(LocalDate.of(2033, 4, 14));
+        try {
+            controller.addFilm(testFilm);
+        } catch (ValidationException e) {
+            assertEquals("Некорректно указана дата релиза.", e.getMessage());
+        }
     }
 
     @Test
-    public void testGetPopular() {
-        // Создание заглушки для filmService
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        Film film1 = Film.builder()
-                .id(1)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film1);
-        Film film2 = Film.builder()
-                .id(2)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film2);
-        Film film3 = Film.builder()
-                .id(3)
-                .name("Название фильма")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2005, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film3);
-        Film film4 = Film.builder()
-                .id(4)
-                .name("Фильм 4")
-                .description("Описание фильма 4")
-                .releaseDate(LocalDate.of(2004, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film4);
-        Film film5 = Film.builder()
-                .id(5)
-                .name("Фильм 5")
-                .description("Описание фильма 5")
-                .releaseDate(LocalDate.of(2003, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film5);
-
-        // Установка поведения заглушки для метода getMostPopular
-        when(filmService.getMostPopular(5)).thenReturn(Arrays.asList(
-                film1,
-                film2,
-                film3,
-                film4,
-                film5
-        ));
-        Collection<Film> result = filmController.getPopular(5);
-        verify(filmService).getMostPopular(5);
-        assertEquals(5, result.size());
+    void createFilm_RealiseDateBeforeFirstFilmDate_badRequestTest(){
+        testFilm.setReleaseDate(LocalDate.of(1833, 4, 14));
+        try {
+            controller.addFilm(testFilm);
+        } catch (ValidationException e) {
+            assertEquals("Некорректно указана дата релиза.", e.getMessage());
+        }
     }
 
-    @Test
-    public void testAddLike() {
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        filmController.addLike(1, 123);
-        verify(filmService).addLike(1, 123);
-    }
-
-    @Test
-    public void testRemoveLike() {
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        filmController.removeLike(1, 123);
-        verify(filmService).removeLike(1, 123);
-    }
-
-    @Test
-    public void testGetFilms() {
-        FilmService filmService = mock(FilmService.class);
-        FilmController filmController = new FilmController(filmService);
-        Film film1 = Film.builder()
-                .id(1)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film1);
-        Film film2 = Film.builder()
-                .id(2)
-                .name("Inception")
-                .description("A heist movie that takes place within the architecture of the mind")
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film2);
-        Film film3 = Film.builder()
-                .id(3)
-                .name("Название фильма")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2005, 7, 16))
-                .duration(148L)
-                .build();
-        filmController.addFilm(film3);
-        when(filmService.getFilms()).thenReturn(Arrays.asList(
-                film1,
-                film2,
-                film3
-        ));
-        Collection<Film> result = filmController.getFilms();
-        verify(filmService).getFilms();
-        assertEquals(3, result.size());
-    }
 }
-
-

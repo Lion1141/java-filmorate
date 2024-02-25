@@ -18,14 +18,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     protected Integer id = 1;
 
     @Override
-    public Film addFilm(Film film) {
+    public Optional<Film> addFilm(Film film) {
         if (film.getId() == null) {
             film.setId(id++);
         }
         if (!films.containsKey(film.getId())) {
             int filmId = film.getId();
             films.put(filmId, film);
-            return film;
+            return Optional.of(film);
         } else {
             throw new RuntimeException(String.format("Фильм с id {} уже существует", film.getId()));
         }
@@ -58,6 +58,22 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.debug("Ошибка удаления фильма с ID: {}", filmId);
             throw new RuntimeException("Неизвестный фильм");
         }
+    }
+
+    @Override
+    public Optional<Film> like(int filmId, int userId) {
+        findById(filmId).get().getLikes().add(userId);
+        return findById(filmId);
+    }
+
+    @Override
+    public Optional<Film> deleteLike(int filmId, int userId) {
+        if (findById(filmId).get().getLikes().contains(userId)) {
+            findById(filmId).get().getLikes().remove(userId);
+        } else {
+            throw new RuntimeException("Пользователь не ставил оценку данному фильму.");
+        }
+        return findById(filmId);
     }
 
     @Override

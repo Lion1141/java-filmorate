@@ -15,7 +15,7 @@ public class InMemoryUserStorage implements UserStorage {
     private static Integer id = 1;
 
     @Override
-    public User createUser(User user) {
+    public Optional<User> createUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -27,12 +27,12 @@ public class InMemoryUserStorage implements UserStorage {
         int userId = user.getId();
         users.put(userId, user);
 
-        return user;
+        return Optional.of(user);
     }
 
     @Override
-    public Collection<User> getUsers() {
-        return users.values();
+    public List<User> getUsers() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -73,7 +73,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Set<User> getUserFriends(Integer userId) {
+    public Optional<User> addFriend(Integer userId, Integer friendId) {
+        findById(userId).get().getFriends().add(friendId);
+        findById(friendId).get().getFriends().add(userId);
+        return findById(userId);
+    }
+
+    @Override
+    public Optional<User> deleteFriend(Integer userId, Integer friendId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Collection<User> getUserFriends(Integer userId) {
         return users.get(userId)
                 .getFriends()
                 .stream().map(user -> findById(user).get())
@@ -81,10 +93,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUserCrossFriends(Integer id, Integer otherId) {
-        var userFriends = getUserFriends(id);
-        var otherUserFriends = getUserFriends(otherId);
+    public List<User> getUserCrossFriends(Integer id, Integer otherId) {
+        List<User> userFriends = (List<User>) getUserFriends(id);
+        List<User> otherUserFriends = (List<User>) getUserFriends(otherId);
 
-        return userFriends.stream().filter(otherUserFriends::contains).collect(Collectors.toCollection(HashSet::new));
+        return userFriends.stream()
+                .filter(otherUserFriends::contains)
+                .collect(Collectors.toList());
     }
 }

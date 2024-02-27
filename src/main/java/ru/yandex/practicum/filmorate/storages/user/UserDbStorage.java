@@ -40,11 +40,10 @@ public class UserDbStorage implements UserStorage {
         List<UserDao> users = new ArrayList<>();
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM users");
         while (rowSet.next()) {
-            try{
+            try {
                 UserDao user = mapSqlRowSetToUser(rowSet, rowSet.getRow());
                 users.add(user);
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 log.error("Unhandled exception {}", ex.getMessage(), ex);
             }
         }
@@ -119,8 +118,7 @@ public class UserDbStorage implements UserStorage {
             try {
                 UserDao user = mapSqlRowSetToUser(rs, rs.getRow());
                 friends.add(user);
-            }
-            catch(Exception ex){
+            } catch (Exception ex) {
                 log.error("Unhandled exception {}", ex.getMessage(), ex);
             }
         }

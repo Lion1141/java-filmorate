@@ -42,7 +42,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "UPDATE FILMS SET " +
                 "name=?, description=?, release_date=?, duration=?, mpa_id=? WHERE film_id=?";
         int rowsCount = jdbcTemplate.update(sqlQuery, updatedFilm.getName(), updatedFilm.getDescription(),
-                updatedFilm.getReleaseDate(), updatedFilm.getDuration(), updatedFilm.getMpa_id(), updatedFilm.getId());
+                updatedFilm.getReleaseDate(), updatedFilm.getDuration(), updatedFilm.getMpaId(), updatedFilm.getId());
         if (rowsCount > 0) {
             return updatedFilm;
         }
@@ -107,7 +107,7 @@ public class FilmDbStorage implements FilmStorage {
         values.put("description", film.getDescription());
         values.put("release_date", film.getReleaseDate());
         values.put("duration", film.getDuration());
-        values.put("mpa_id", film.getMpa_id());
+        values.put("mpa_id", film.getMpaId());
         return values;
     }
 
@@ -118,7 +118,7 @@ public class FilmDbStorage implements FilmStorage {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getLong("duration"))
-                .mpa_id(resultSet.getInt("mpa_id"))
+                .mpaId(resultSet.getInt("mpa_id"))
                 .build();
     }
 }

@@ -41,7 +41,7 @@ class FilmDbStorageTest {
                 .description("desc")
                 .releaseDate(LocalDate.of(1999, 8, 17))
                 .duration(136L)
-                .mpa_id(1)
+                .mpaId(1)
                 .build();
 
         film2 = FilmDao.builder()
@@ -49,7 +49,7 @@ class FilmDbStorageTest {
                 .description("desc")
                 .releaseDate(LocalDate.of(1999, 8, 17))
                 .duration(136L)
-                .mpa_id(1)
+                .mpaId(1)
                 .build();
 
         user = UserDao.builder()

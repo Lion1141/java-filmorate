@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.dao;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 
@@ -22,6 +21,6 @@ public class FilmDao {
 
     public Long duration;
 
-    public int mpa_id;
+    public int mpaId;
 
 }

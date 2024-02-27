@@ -21,27 +21,27 @@ public class UserService {
         return users.stream().map(this::toMap).collect(Collectors.toList());
     }
 
-    public Optional<User> updateUser(User updatedUser){
+    public Optional<User> updateUser(User updatedUser) {
         UserDao dao = userStorage.updateUser(fromUserToDao(updatedUser));
         return Optional.of(toMap(dao));
     }
 
-    public Optional<User> createUser(User user){
+    public Optional<User> createUser(User user) {
         validationUser(user);
         UserDao userDao = fromUserToDao(user);
         Optional<UserDao> result = userStorage.createUser(userDao);
-        if(result.isEmpty())
+        if (result.isEmpty())
             return Optional.empty();
         return Optional.of(toMap(result.get()));
     }
 
-    public void deleteUser(Integer userId){
+    public void deleteUser(Integer userId) {
         userStorage.deleteUser(userId);
     }
 
-    public Optional<User> findById(Integer userId){
+    public Optional<User> findById(Integer userId) {
         var dao = userStorage.findById(userId);
-        if(dao.isEmpty())
+        if (dao.isEmpty())
             return Optional.empty();
         return Optional.of(toMap(dao.get()));
     }
@@ -50,7 +50,7 @@ public class UserService {
     public Optional<User> addFriend(int userId, int friendId) {
         userStorage.addFriend(userId, friendId);
         var user = userStorage.findById(userId);
-        if(user.isEmpty())
+        if (user.isEmpty())
             return Optional.empty();
 
         return Optional.of(toMap(user.get()));
@@ -59,7 +59,7 @@ public class UserService {
     public Optional<User> deleteFriend(int userId, int friendId) {
         userStorage.deleteFriend(userId, friendId);
         var user = userStorage.findById(userId);
-        if(user.isEmpty())
+        if (user.isEmpty())
             return Optional.empty();
 
         return Optional.of(toMap(user.get()));
@@ -91,7 +91,7 @@ public class UserService {
         return userDao;
     }
 
-    private User toMap(UserDao userDao){
+    private User toMap(UserDao userDao) {
         User user = User.builder()
                 .id(userDao.id)
                 .name(userDao.name)

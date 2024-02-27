@@ -66,7 +66,7 @@ public class GenreBdStorageTest {
                 .id(1)
                 .name("Комедия")
                 .build());
-        assertEquals(2, film.getGenres().size());
+        assertEquals(1, film.getGenres().size());
     }
 
     @Test

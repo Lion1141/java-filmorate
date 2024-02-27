@@ -7,12 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storages.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.dao.LikeDbStorage;
-import ru.yandex.practicum.filmorate.storages.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
+import ru.yandex.practicum.filmorate.storages.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storages.like.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storages.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -29,48 +28,38 @@ class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
     private final LikeDbStorage likeDbStorage;
-    Film film;
-    Film film2;
-    User user;
-    User user2;
+    FilmDao film;
+    FilmDao film2;
+    UserDao user;
+    UserDao user2;
 
 
     @BeforeEach
     void setUp() {
-        film = Film.builder()
+        film = FilmDao.builder()
                 .name("name")
                 .description("desc")
                 .releaseDate(LocalDate.of(1999, 8, 17))
-                .duration(136)
+                .duration(136L)
+                .mpa_id(1)
                 .build();
-        film.setGenres(new HashSet<>());
-        film.setLikes(new HashSet<>());
-        film.setMpa(Mpa.builder()
-                .id(1)
-                .name("NC-17")
-                .build());
 
-        film2 = Film.builder()
+        film2 = FilmDao.builder()
                 .name("name2")
                 .description("desc")
                 .releaseDate(LocalDate.of(1999, 8, 17))
-                .duration(136)
+                .duration(136L)
+                .mpa_id(1)
                 .build();
-        film2.setGenres(new HashSet<>());
-        film2.setLikes(new HashSet<>());
-        film2.setMpa(Mpa.builder()
-                .id(1)
-                .name("NC-17")
-                .build());
 
-        user = User.builder()
+        user = UserDao.builder()
                 .email("mail@mail.mail")
                 .login("login")
                 .birthday(LocalDate.of(1999, 8, 17))
                 .build();
         user.setFriends(new HashSet<>());
 
-        user2 = User.builder()
+        user2 = UserDao.builder()
                 .email("gmail@gmail.gmail")
                 .login("nelogin")
                 .birthday(LocalDate.of(2001, 6, 19))
@@ -91,10 +80,10 @@ class FilmDbStorageTest {
 
         String updatedName = "updateName";
         film.setName(updatedName);
-        Film updatedFilm = filmDbStorage.updateFilm(film);
+        FilmDao updatedFilm = filmDbStorage.updateFilm(film);
         assertEquals(updatedName, updatedFilm.getName());
 
-        Optional<Film> retrievedFilm = filmDbStorage.findById(film.getId());
+        Optional<FilmDao> retrievedFilm = filmDbStorage.findById(film.getId());
         assertEquals(updatedName, retrievedFilm.get().getName());
     }
 
@@ -105,12 +94,10 @@ class FilmDbStorageTest {
         userDbStorage.createUser(user2);
         filmDbStorage.like(1, 1);
         filmDbStorage.like(1, 2);
-        film.setLikes(likeDbStorage.getLikesForCurrentFilm(film.getId()));
-        assertEquals(2, film.getLikes().size());
+        assertEquals(2, likeDbStorage.getLikesForCurrentFilm(film.getId()).size());
 
         filmDbStorage.deleteLike(1, 1);
-        film.setLikes(likeDbStorage.getLikesForCurrentFilm(film.getId()));
-        assertEquals(1, film.getLikes().size());
+        assertEquals(1, likeDbStorage.getLikesForCurrentFilm(film.getId()).size());
     }
 
     @Test

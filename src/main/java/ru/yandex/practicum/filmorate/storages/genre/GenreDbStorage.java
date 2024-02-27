@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storages.dao;
+package ru.yandex.practicum.filmorate.storages.genre;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storages.GenreStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -53,18 +53,20 @@ public class GenreDbStorage implements GenreStorage {
         if (Objects.isNull(film.getGenres())) {
             return;
         }
-        film.getGenres().forEach(g -> {
-            String sqlQuery = "INSERT INTO FILM_GENRE(film_id, genre_id) VALUES (?, ?)";
-            jdbcTemplate.update(sqlQuery,
-                    film.getId(),
-                    g.getId());
-        });
+
+        String sqlQuery = "INSERT INTO FILM_GENRE(film_id, genre_id) VALUES (?, ?)";
+        List<Object[]> batchArgs = film.getGenres().stream()
+                .map(g -> new Object[]{film.getId(), g.getId()})
+                .collect(Collectors.toList());
+
+        jdbcTemplate.batchUpdate(sqlQuery, batchArgs);
     }
 
     public void addGenreNameToFilm(Film film) {
         if (Objects.isNull(film.getGenres())) {
             return;
         }
+
         film.getGenres().forEach(g -> getGenreForId(g.getId()).map(Genre::getName).ifPresent(g::setName));
     }
 

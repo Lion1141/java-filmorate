@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storages.dao.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storages.mpa.MpaDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;

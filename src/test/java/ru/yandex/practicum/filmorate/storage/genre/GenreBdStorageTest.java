@@ -10,9 +10,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.film.GenreService;
-import ru.yandex.practicum.filmorate.storages.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storages.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storages.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storages.mpa.MpaStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -31,6 +33,7 @@ public class GenreBdStorageTest {
     private final FilmDbStorage filmDbStorage;
     private final GenreService genreService;
     private final GenreDbStorage genreDbStorage;
+    private final MpaStorage mpaStorage;
     Film film;
 
 
@@ -68,14 +71,16 @@ public class GenreBdStorageTest {
 
     @Test
     void getGenreForIdTest() {
-        Optional<Genre> genreTest = genreService.getGenre(1);
+        Optional<Genre> genreTest = genreDbStorage.getGenreForId(1);
         assertEquals("Комедия", genreTest.get().getName());
     }
 
     @Test
     void addGenreTest() {
         assertTrue(film.getGenres().isEmpty());
-        filmDbStorage.addFilm(film);
+        var filmDao = filmDbStorage.addFilm(FilmService.map(film));
+        film.setId(filmDao.get().getId());
+        mpaStorage.addMpaToFilm(film);
         film.getGenres().add(Genre.builder()
                 .id(1)
                 .name("Комедия")
@@ -87,7 +92,8 @@ public class GenreBdStorageTest {
     @Test
     void updateGenreTest() {
         assertTrue(film.getGenres().isEmpty());
-        filmDbStorage.addFilm(film);
+        var filmDao = filmDbStorage.addFilm(FilmService.map(film));
+        film.setId(filmDao.get().getId());
         film.getGenres().add(Genre.builder()
                 .id(1)
                 .name("Комедия")

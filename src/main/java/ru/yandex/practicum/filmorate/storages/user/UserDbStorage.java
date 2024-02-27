@@ -1,5 +1,6 @@
-package ru.yandex.practicum.filmorate.storages.dao;
+package ru.yandex.practicum.filmorate.storages.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -7,10 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,48 +18,42 @@ import java.util.stream.Collectors;
 
 @Primary
 @Slf4j
+@RequiredArgsConstructor
 @Component
 @Qualifier
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
-    public Optional<User> createUser(User user) {
-        validationUser(user);
+    public Optional<UserDao> createUser(UserDao userDao) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("USERS")
                 .usingGeneratedKeyColumns("user_id");
-        user.setId(simpleJdbcInsert.executeAndReturnKey(toMap(user)).intValue());
+        userDao.id = simpleJdbcInsert.executeAndReturnKey(toMap(userDao)).intValue();
         log.info("Пользователь добавлен в базу данных");
-        return Optional.of(user);
+        return Optional.of(userDao);
     }
 
     @Override
-    public List<User> getUsers() {
-        List<User> users = new ArrayList<>();
+    public List<UserDao> getUsers() {
+        List<UserDao> users = new ArrayList<>();
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM users");
         while (rowSet.next()) {
-            User user = User.builder()
-                    .id(rowSet.getInt("user_id"))
-                    .name(rowSet.getString("name"))
-                    .login(rowSet.getString("login"))
-                    .email(rowSet.getString("email"))
-                    .birthday(Objects.requireNonNull(rowSet.getDate("birthday")).toLocalDate())
-                    .build();
-            users.add(user);
+            try{
+                UserDao user = mapSqlRowSetToUser(rowSet, rowSet.getRow());
+                users.add(user);
+            }
+            catch (Exception ex){
+                log.error("Unhandled exception {}", ex.getMessage(), ex);
+            }
         }
         return users;
     }
 
     @Override
-    public User updateUser(User updatedUser) {
-        validationUser(updatedUser);
-        String sqlQuery = "UPDATE users SET " +
+    public UserDao updateUser(UserDao updatedUser) {
+        String sqlQuery = "UPDATE USERS SET " +
                 "email=?, login=?, name=?, birthday=? WHERE user_id=?";
         int rowsCount = jdbcTemplate.update(sqlQuery, updatedUser.getEmail(), updatedUser.getLogin(),
                 updatedUser.getName(), updatedUser.getBirthday(), updatedUser.getId());
@@ -72,7 +65,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> findById(Integer userId) throws RuntimeException {
+    public Optional<UserDao> findById(Integer userId) throws RuntimeException {
         String sqlQuery = "SELECT user_id, email, login, name, birthday FROM users WHERE user_id=?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, userId));
@@ -83,7 +76,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUser(Integer userId) {
-        Optional<User> user = findById(userId);
+        Optional<UserDao> user = findById(userId);
         if (user.isPresent()) {
             String sqlQuery =
                     "DELETE " +
@@ -97,76 +90,82 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> addFriend(Integer userId, Integer friendId) {
-            Optional<User> user = findById(userId);
-            try {
-                findById(friendId);
-            } catch (RuntimeException e) {
-                throw new NotFoundException("Пользователь не найден.");
-            }
-            String sqlQuery = "INSERT INTO friends (user_id, friend_id) VALUES(?, ?)";
-            jdbcTemplate.update(sqlQuery, userId, friendId);
-            return user;
+    public Optional<UserDao> addFriend(Integer userId, Integer friendId) {
+        Optional<UserDao> user = findById(userId);
+        try {
+            findById(friendId);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователь не найден.");
         }
+        String sqlQuery = "INSERT INTO friends (user_id, friend_id) VALUES(?, ?)";
+        jdbcTemplate.update(sqlQuery, userId, friendId);
+        return user;
+    }
 
     @Override
-    public Optional<User> deleteFriend(Integer userId, Integer friendId) {
-        Optional<User> user = findById(userId);
+    public Optional<UserDao> deleteFriend(Integer userId, Integer friendId) {
+        Optional<UserDao> user = findById(userId);
         String sqlQuery = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sqlQuery, userId, friendId);
         return user;
     }
 
     @Override
-    public Collection<User> getUserFriends(Integer userId) {
+    public Collection<UserDao> getUserFriends(Integer userId) {
         final String sql = "SELECT * From USERS where USER_ID IN (SELECT FRIEND_ID FROM FRIENDS where USER_ID = ?)";
-        Collection<User> friends = new HashSet<>();
+        Collection<UserDao> friends = new HashSet<>();
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, userId);
         while (rs.next()) {
-            User user = User.builder()
-                    .id(rs.getInt("user_id"))
-                    .email(rs.getString("email"))
-                    .login(rs.getString("login"))
-                    .name(rs.getString("name"))
-                    .birthday(rs.getDate("birthday").toLocalDate())
-                    .build();
-            friends.add(user);
+            try {
+                UserDao user = mapSqlRowSetToUser(rs, rs.getRow());
+                friends.add(user);
+            }
+            catch(Exception ex){
+                log.error("Unhandled exception {}", ex.getMessage(), ex);
+            }
         }
-        return friends.stream().sorted(Comparator.comparing(User::getId)).collect(Collectors.toList());
+
+        return friends.stream().sorted(Comparator.comparing(UserDao::getId)).collect(Collectors.toList());
     }
 
     @Override
-    public List<User> getUserCrossFriends(Integer userId, Integer otherUserId) {
+    public List<UserDao> getUserCrossFriends(Integer userId, Integer otherUserId) {
         String sqlQuery = "SELECT user_id, email, login, name, birthday FROM users WHERE user_id IN(" +
                 "SELECT friend_id FROM friends WHERE user_id = ?) " +
                 "AND user_id IN(SELECT friend_id FROM friends WHERE user_id = ?)";
         return new ArrayList<>(jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId, otherUserId));
     }
 
-    private void validationUser(User user) throws ValidationException {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
-
-    private Map<String, Object> toMap(User user) {
+    private Map<String, Object> toMap(UserDao user) {
         Map<String, Object> values = new HashMap<>();
-        values.put("email", user.getEmail());
-        values.put("login", user.getLogin());
-        values.put("name", user.getName());
-        values.put("birthday", user.getBirthday());
+        values.put("email", user.email);
+        values.put("login", user.login);
+        values.put("name", user.name);
+        values.put("birthday", user.birthday);
         return values;
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user = User.builder()
+    private UserDao mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
+        UserDao user = UserDao.builder()
                 .id(resultSet.getInt("user_id"))
                 .email(resultSet.getString("email"))
                 .login(resultSet.getString("login"))
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-        user.setFriends(getUserFriends(user.getId()).stream().map(User::getId).collect(Collectors.toSet()));
+        user.setFriends(getUserFriends(user.getId()).stream().map(UserDao::getId).collect(Collectors.toSet()));
+        return user;
+    }
+
+    private UserDao mapSqlRowSetToUser(SqlRowSet rowSet, int rowNum) throws SQLException {
+        UserDao user = UserDao.builder()
+                .id(rowSet.getInt("user_id"))
+                .email(rowSet.getString("email"))
+                .login(rowSet.getString("login"))
+                .name(rowSet.getString("name"))
+                .birthday(rowSet.getDate("birthday").toLocalDate())
+                .build();
+        user.setFriends(getUserFriends(user.getId()).stream().map(UserDao::getId).collect(Collectors.toSet()));
         return user;
     }
 }

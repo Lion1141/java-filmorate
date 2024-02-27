@@ -2,12 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
-import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -19,39 +17,37 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
-
-    private final UserStorage userStorage;
     private final UserService userService;
 
     @GetMapping
     public List<User> getUsers() {
         log.info("Поступил запрос на получение списка пользователей.");
-        return userStorage.getUsers();
+        return userService.getUsers();
     }
 
     @PostMapping
     public Optional<User> createUser(@Valid @RequestBody User user) {
         log.info("Поступил запрос на создание пользователя.");
-        return userStorage.createUser(user);
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User updateUsers(@Valid @RequestBody User updatedUser) {
+    public Optional<User> updateUsers(@Valid @RequestBody User updatedUser) {
         log.info("Поступил запрос на обновление пользователя.");
-        return userStorage.updateUser(updatedUser);
+        return userService.updateUser(updatedUser);
     }
 
     @DeleteMapping("{id}")
     public void deleteUser(@Valid @PathVariable Integer userId) {
-        userStorage.deleteUser(userId);
+        userService.deleteUser(userId);
     }
 
     @GetMapping("{id}")
     public Optional<User> findById(@Valid @PathVariable Integer id) {
         log.info("Поступил запрос на получение пользователя по id.");
-        Optional<User> user = userStorage.findById(id);
+        Optional<User> user = userService.findById(id);
         if (user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
+            throw new NotFoundException("Невозможно найти пользователя с указанным ID");
         }
         return user;
     }
@@ -60,7 +56,7 @@ public class UserController {
     public void addFriend(@Valid @PathVariable Integer id, @Valid @PathVariable Integer friendId) {
         log.info("Поступил запрос на добавление в список друзей.");
         if (id < 1 || friendId < 1) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Невозможно найти пользователя с указанным ID");
+            throw new NotFoundException("Невозможно найти пользователя с указанным ID");
         }
         userService.addFriend(id, friendId);
     }

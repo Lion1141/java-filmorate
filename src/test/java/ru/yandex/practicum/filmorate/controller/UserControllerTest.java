@@ -1,30 +1,42 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
-import ru.yandex.practicum.filmorate.storages.UserStorage;
-import ru.yandex.practicum.filmorate.storages.memory.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storages.user.UserDbStorage;
 
-import javax.validation.ValidationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserControllerTest {
+class UserControllerTest extends AbstractControllerTest {
     UserController controller;
-    UserStorage userStorage;
+    @Autowired
+    UserDbStorage userStorage;
     UserService userService;
     User testUser;
 
+    private static Validator validator;
+
+    @BeforeAll
+    static void beforeAll() {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
+
     @BeforeEach
     protected void init() {
-        userStorage = new InMemoryUserStorage();
         userService = new UserService(userStorage);
-        controller = new UserController(userStorage, userService);
+        controller = new UserController(userService);
 
         testUser = User.builder()
                 .name("John")
@@ -45,10 +57,7 @@ class UserControllerTest {
     @Test
     void createUser_BirthdayInFuture_badRequestTest() {
         testUser.setBirthday(LocalDate.parse("2024-10-12"));
-        try {
-            controller.createUser(testUser);
-        } catch (ValidationException e) {
-            assertEquals("Неверно указана дата рождения", e.getMessage());
-        }
+        var violations = validator.validate(testUser);
+        assertEquals(1, violations.size());
     }
 }

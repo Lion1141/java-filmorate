@@ -8,8 +8,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storages.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.dao.UserDao;
+import ru.yandex.practicum.filmorate.storages.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -25,31 +25,34 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class UserDbStorageTest {
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbcTemplate;
-    User user;
-    User friend;
-    User mutualFriend;
+    UserDao user;
+    UserDao friend;
+    UserDao mutualFriend;
 
     @BeforeEach
     public void setUp() {
         jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("DELETE FROM friends");
-        user = User.builder()
+        user = UserDao.builder()
                 .email("mail@mail.mail")
+                .name("login")
                 .login("login")
                 .birthday(LocalDate.of(1999, 8, 17))
                 .build();
         user.setFriends(new HashSet<>());
 
-        friend = User.builder()
+        friend = UserDao.builder()
                 .email("gmail@gmail.gmail")
                 .login("nelogin")
+                .name("nelogin")
                 .birthday(LocalDate.of(2001, 6, 19))
                 .build();
         friend.setFriends(new HashSet<>());
 
-        mutualFriend = User.builder()
+        mutualFriend = UserDao.builder()
                 .email("mutual@mutual.mutual")
                 .login("mutual")
+                .name("mutual")
                 .birthday(LocalDate.of(2001, 1, 11))
                 .build();
         mutualFriend.setFriends(new HashSet<>());

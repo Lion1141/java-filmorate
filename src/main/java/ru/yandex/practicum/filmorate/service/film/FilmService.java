@@ -30,7 +30,7 @@ public class FilmService {
         mpaDbStorage.addMpaToFilm(film);
         genreDbStorage.addGenreNameToFilm(film);
         genreDbStorage.addGenresForCurrentFilm(film);
-        if(result.isEmpty())
+        if (result.isEmpty())
             return Optional.empty();
         return Optional.of(map(result.get()));
     }
@@ -42,13 +42,13 @@ public class FilmService {
 
         var result = filmStorage.like(filmId, userId);
 
-        if(result.isEmpty())
+        if (result.isEmpty())
             return Optional.empty();
 
         return Optional.of(map(result.get()));
     }
 
-    public Collection<Film> getFilms(){
+    public Collection<Film> getFilms() {
         return filmStorage
                 .getFilms()
                 .stream()
@@ -63,13 +63,13 @@ public class FilmService {
 
         var result = filmStorage.deleteLike(filmId, userId);
 
-        if(result.isEmpty())
+        if (result.isEmpty())
             return Optional.empty();
 
         return Optional.of(map(result.get()));
     }
 
-    public Film updateFilm(Film updatedFilm){
+    public Film updateFilm(Film updatedFilm) {
         filmStorage.updateFilm(map(updatedFilm));
         mpaDbStorage.addMpaToFilm(updatedFilm);
         genreDbStorage.updateGenresForCurrentFilm(updatedFilm);
@@ -79,7 +79,7 @@ public class FilmService {
         return updatedFilm;
     }
 
-    public List<Film> getMostPopular(Integer count){
+    public List<Film> getMostPopular(Integer count) {
         return filmStorage
                 .getMostPopular(count)
                 .stream()
@@ -87,14 +87,14 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteFilm(Integer filmId){
+    public void deleteFilm(Integer filmId) {
         filmStorage.deleteFilm(filmId);
     }
 
-    public Optional<Film> findById(Integer filmId){
+    public Optional<Film> findById(Integer filmId) {
         var result = filmStorage.findById(filmId);
 
-        if(result.isEmpty())
+        if (result.isEmpty())
             return Optional.empty();
 
         return Optional.of(map(result.get()));
@@ -116,7 +116,7 @@ public class FilmService {
         return film;
     }
 
-    public static FilmDao map(Film filmDao){
+    public static FilmDao map(Film filmDao) {
         FilmDao film = FilmDao.builder()
                 .id(filmDao.getId())
                 .name(filmDao.getName())

@@ -8,15 +8,17 @@ import ru.yandex.practicum.filmorate.validator.IsAfter;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 @Data
 @Builder
 public class Film {
-    private final Set<Integer> likes = new HashSet<>();
+    @NotNull
+    private Mpa mpa;
+    private Collection<Genre> genres;
+    private Collection<Integer> likes;
     @Min(value = 1, message = "Невозможно найти фильм с указанным ID")
-    private Integer id;
+    protected Integer id;
     @NotEmpty(message = "Название фильма не должно быть пустым")
     private String name;
     @Size(max = 200)
@@ -26,12 +28,4 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private long duration;
-
-    public void addLike(Integer filmId) {
-        likes.add(filmId);
-    }
-
-    public void removeLike(Integer userId) {
-        likes.remove(userId);
-    }
 }

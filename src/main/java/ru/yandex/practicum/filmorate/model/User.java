@@ -10,15 +10,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
-    private Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends;
     @Min(value = 1, message = "Невозможно найти пользователем с указанным ID")
     private Integer id;
     @Email(message = "Некорректно введён email пользователя")
@@ -28,9 +27,4 @@ public class User {
     private String name;
     @Past
     private LocalDate birthday;
-
-    public void addFriend(User user) {
-        this.friends.add(user.id);
-    }
-
 }
